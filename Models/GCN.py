@@ -22,7 +22,10 @@ def normalize_digraph(A):
 def Comp_degree(A):
     out_degree = torch.sum(A, dim=0)
     in_degree = torch.sum(A, dim=1)
-    diag = torch.eye(A.size()[0])
+    if torch.cuda.is_available():
+        diag = torch.eye(A.size()[0]).cuda()
+    else:
+        diag = torch.eye(A.size()[0])
     degree_matrix = diag * in_degree + diag * out_degree - torch.diagflat(torch.diagonal(A))
     return degree_matrix
 
@@ -43,8 +46,12 @@ class GraphConv_Ortega(nn.Module):
         assert (d == self.in_dim)
         A_norm = A
         deg_mat = Comp_degree(A_norm)
-        frac_degree = torch.FloatTensor(fractional_matrix_power(deg_mat.detach().cpu(),
-                                                                -0.5))
+        if torch.cuda.is_available():
+            frac_degree = torch.FloatTensor(fractional_matrix_power(deg_mat.detach().cpu(),
+                                                                -0.5)).cuda()
+        else:
+            frac_degree = torch.FloatTensor(fractional_matrix_power(deg_mat.detach().cpu(),
+                                                                    -0.5))
         Laplacian = deg_mat - A_norm
         Laplacian_norm = frac_degree.matmul(Laplacian.matmul(frac_degree))
         _, U = torch.eig(Laplacian_norm, eigenvectors=True)

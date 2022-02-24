@@ -20,7 +20,7 @@ def MFCC(x):
     x = pad(x)
     x = librosa.util.normalize(x)
     mfcc = librosa.feature.mfcc(x, sr=16000, n_mfcc=32)
-    # delta = librosa.feature.delta(mfcc)
-    # delta2 = librosa.feature.delta(delta)
-    # feats = np.concatenate((mfcc, delta, delta2), axis=0)
-    return mfcc
+    delta = librosa.feature.delta(mfcc)
+    delta2 = librosa.feature.delta(delta)
+    feats = np.concatenate((mfcc, delta, delta2), axis=0)
+    return feats

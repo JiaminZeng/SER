@@ -44,7 +44,7 @@ class IEMOCAPDataset(Dataset):
         else:
             self.series = self.series[5000:]
         self.n_samples = len(self.series)
-        self.labels = torch.from_numpy(self.labels)
+        self.labels = torch.from_numpy(self.labels).type(torch.long)
 
     def __getitem__(self, index):
         feature = torch.Tensor(MFCC(self.paths[self.series[index]]))
