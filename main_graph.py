@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 
 from Models.GCN import Graph_CNN_ortega
+from Models.CNN import ConvNet
 from dataset import IEMOCAPDataset
 
 label_folder_path = './Data/Evaluation'
@@ -12,7 +13,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
 num_epochs = 200
-batch_size = 32
+batch_size = 16
 learning_rate = 0.001
 
 feature_type = "MFCC"
@@ -44,8 +45,9 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 classes = ('ang', 'hap and ext', 'neu', 'sad')
 
-model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
-                         final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
+# model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
+#                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
+model = ConvNet()
 
 criterion = nn.CrossEntropyLoss()
 
@@ -59,7 +61,6 @@ for epoch in range(num_epochs):
     for i, (features, labels) in enumerate(train_loader):
         features = features.to(device)
         labels = labels.to(device)
-
         # Forward pass
         outputs = model(features)
         loss = criterion(outputs, labels)

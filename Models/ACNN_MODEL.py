@@ -7,8 +7,6 @@ import tensor2tensor.layers.area_attention as area_attention
 from tensorflow import keras
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 
 class MACNN(Model):
     def __init__(self, attention_heads=4, attention_size=32, out_size=4):
