@@ -22,5 +22,8 @@ def MFCC(x):
     mfcc = librosa.feature.mfcc(x, sr=16000, n_mfcc=32)
     delta = librosa.feature.delta(mfcc)
     delta2 = librosa.feature.delta(delta)
-    feats = np.concatenate((mfcc, delta, delta2), axis=0)
+    feats = np.concatenate((mfcc, delta), axis=0)
+    feats = np.transpose(feats)
     return feats
+
+

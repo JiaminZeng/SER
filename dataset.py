@@ -6,6 +6,7 @@ import torch
 from torch.utils.data.dataset import Dataset
 
 from Utils.FeaturesUtils import MFCC
+from Utils.GetFunction import LFCC
 
 
 def walk(label_folder_path, file_root):
@@ -33,22 +34,27 @@ def walk(label_folder_path, file_root):
 
 class IEMOCAPDataset(Dataset):
 
-    def __init__(self, label_folder_path, file_root, train=True):
+    def __init__(self, label_folder_path, file_root, feature_type="MFCC", train=True):
         self.paths, self.labels = walk(label_folder_path, file_root)
         self.n_samples = self.labels.shape[0]
+        self.feature = feature_type
         random.seed(0)
         self.series = [inx for inx in range(self.n_samples)]
         random.shuffle(self.series)
+        num = int(self.n_samples / 5)
         if train:
-            self.series = self.series[0:5000]
+            self.series = self.series[num:]
         else:
-            self.series = self.series[5000:]
+            self.series = self.series[:num]
         self.n_samples = len(self.series)
         self.labels = torch.from_numpy(self.labels).type(torch.long)
 
     def __getitem__(self, index):
-        feature = torch.Tensor(MFCC(self.paths[self.series[index]]))
-        feature.transpose_(0, 1)
+        feature = ''
+        if self.feature == "MFCC":
+            feature = torch.Tensor(MFCC(self.paths[self.series[index]]))
+        elif self.feature == "LFCC":
+            feature = torch.Tensor(LFCC(self.paths[self.series[index]]))
         return feature, self.labels[self.series[index]]
 
     def __len__(self):

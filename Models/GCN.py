@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from scipy.linalg import fractional_matrix_power
 from torch.nn import init
 
-from Models.MLP_GCN import MLP
+from Models.MLP import MLP
 
 
 def normalize_digraph(A):
@@ -37,9 +37,13 @@ class GraphConv_Ortega(nn.Module):
         self.out_dim = out_dim
         self.MLP = MLP(num_layers, in_dim, hidden_dim, out_dim)
 
-        for i in range(num_layers):
-            init.xavier_uniform_(self.MLP.linears[i].weight)
-            init.constant_(self.MLP.linears[i].bias, 0)
+        if num_layers == 1:
+            init.xavier_uniform_(self.MLP.linear.weight)
+            init.constant_(self.MLP.linear.bias, 0)
+        else:
+            for i in range(num_layers):
+                init.xavier_uniform_(self.MLP.linears[i].weight)
+                init.constant_(self.MLP.linears[i].bias, 0)
 
     def forward(self, features, A):
         b, n, d = features.shape
@@ -48,7 +52,7 @@ class GraphConv_Ortega(nn.Module):
         deg_mat = Comp_degree(A_norm)
         if torch.cuda.is_available():
             frac_degree = torch.FloatTensor(fractional_matrix_power(deg_mat.detach().cpu(),
-                                                                -0.5)).cuda()
+                                                                    -0.5)).cuda()
         else:
             frac_degree = torch.FloatTensor(fractional_matrix_power(deg_mat.detach().cpu(),
                                                                     -0.5))
@@ -85,15 +89,13 @@ class Graph_CNN_ortega(nn.Module):
 
         # Linear functions that maps the hidden representations to labels
         self.classifier = nn.Sequential(
-            nn.Linear(self.hidden_dim, 128),
+            nn.Linear(self.hidden_dim, 256),
             nn.Dropout(p=self.final_dropout),
-            nn.PReLU(128),
-            nn.Linear(128, output_dim))
+            nn.PReLU(256),
+            nn.Linear(256, output_dim))
 
-    def forward(self, x):
-        X_concat = x
+    def forward(self, h):
         A = F.relu(self.Adj)
-        h = X_concat
         for layer in self.GCNs:
             h = F.relu(layer(h, A))
         pooled = None

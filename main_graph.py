@@ -11,35 +11,48 @@ file_root = './Data/Wav'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 50
-batch_size = 64
+num_epochs = 200
+batch_size = 32
 learning_rate = 0.001
 
+feature_type = "MFCC"
+num_layer = 2
+frame_size = 128
+input_dim = 64
+pool_type = "sum"
+hidden_dim = 128
+final_dropout = 0.5
+
+msg = f'feature_type{feature_type}\nnum_layer{num_layer}\nframe_size{frame_size}\nimput_dim{input_dim}\n' \
+      f'pool_type{pool_type}\nhidden_dim{hidden_dim}\nfinal_dropout{final_dropout}'
+
 # Adj
-A = np.zeros((128, 128))
-for i in range(127):
+A = np.zeros((frame_size, frame_size))
+for i in range(frame_size - 1):
     A[i][i + 1] = 1
     A[i + 1][i] = 1
-A[0][127] = 1
-A[127][0] = 1
+A[0][frame_size - 1] = 1
+A[frame_size - 1][0] = 1
 A = torch.Tensor(A).to(device)
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, train=True)
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, train=False)
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, train=True)
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, train=False)
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
-                                           shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
-                                          shuffle=False)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 classes = ('ang', 'hap and ext', 'neu', 'sad')
 
-model = Graph_CNN_ortega(num_layers=2, input_dim=96, hidden_dim=128, output_dim=4, final_dropout=0.5,
-                         graph_pooling_type="sum", device=device, adj=A).to(device)
+model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
+                         final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
 
 criterion = nn.CrossEntropyLoss()
+
+# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+
+max_acc = 0
 
 n_total_steps = len(train_loader)
 for epoch in range(num_epochs):
@@ -82,8 +95,14 @@ for epoch in range(num_epochs):
                 n_class_samples[label] += 1
 
         acc = 100.0 * n_correct / n_samples
+        if acc > max_acc:
+            max_acc = acc
         print(f'Accuracy of the network: {acc} %')
 
         for i in range(4):
             acc = 100.0 * n_class_correct[i] / n_class_samples[i]
             print(f'Accuracy of {classes[i]}: {acc} %')
+        print(f'Best result: {max_acc} %')
+        print(f'------------------------')
+
+print(msg)
