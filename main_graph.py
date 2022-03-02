@@ -51,8 +51,8 @@ model = ConvNet().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
-# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+# optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 max_acc = 0
 
