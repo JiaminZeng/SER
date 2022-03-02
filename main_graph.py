@@ -47,7 +47,7 @@ classes = ('ang', 'hap and ext', 'neu', 'sad')
 
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
-model = ConvNet()
+model = ConvNet().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
