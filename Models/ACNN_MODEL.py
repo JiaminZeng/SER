@@ -27,6 +27,7 @@ class MACNN(Model):
         self.gap = nn.GlobalAveragePooling2D(data_format='channels_last')
         self.flatten = nn.Flatten(data_format='channels_last')
         self.fc = nn.Dense(out_size, activation='softmax')
+
         self.attention_query = []
         self.attention_key = []
         self.attention_value = []
@@ -63,14 +64,6 @@ class MACNN(Model):
 
         attn = None
         for i in range(self.attention_heads):
-            # Q = self.attention_query[i](x)
-            # Q = tf.transpose(Q, perm=[0, 3, 1, 2])
-            # K = self.attention_key[i](x)
-            # K = tf.transpose(K, perm=[0, 3, 2, 1])
-            # V = self.attention_value[i](x)
-            # V = tf.transpose(V, perm=[0, 3, 1, 2])
-            # attention = tf.nn.softmax(tf.matmul(Q, K))
-            # attention = tf.matmul(attention, V)
             Q = self.attention_query[i](x)
             K = self.attention_key[i](x)
             V = self.attention_value[i](x)
