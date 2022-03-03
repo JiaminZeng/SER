@@ -39,9 +39,9 @@ class ConvNet(nn.Module):
         self.nm5 = nn.BatchNorm2d(80)
         # rule
 
-        self.attention_query = []
-        self.attention_key = []
-        self.attention_value = []
+        self.attention_query = torch.nn.ModuleList()
+        self.attention_key = torch.nn.ModuleList()
+        self.attention_value = torch.nn.ModuleList()
         self.attention_heads = 4
 
         for i in range(self.attention_heads):
@@ -64,7 +64,7 @@ class ConvNet(nn.Module):
 
         yy = self.conv1_2(x)
         yy = self.pd1_2(yy)
-        yy = self.nm1_1(yy)
+        yy = self.nm1_2(yy)
 
         x = torch.cat([xx, yy], dim=1)
         x = F.relu(x)
@@ -97,12 +97,12 @@ class ConvNet(nn.Module):
             Q = self.attention_query[i](x)
             K = self.attention_key[i](x)
             V = self.attention_value[i](x)
-            attention = F.softmax(torch.mul(Q, K), -1)
-            attention = torch.mul(attention, V)
+            attention = F.softmax(torch.mul(Q, K).cuda(), -1).cuda()
+            attention = torch.mul(attention, V).cuda()
             if attn is None:
                 attn = attention
             else:
-                attn = torch.cat([attn, attention], 2)
+                attn = torch.cat([attn, attention], 2).cuda()
 
         x = attn
         x = x.view(b, -1)

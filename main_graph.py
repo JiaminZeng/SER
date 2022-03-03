@@ -6,8 +6,8 @@ from Models.GCN import Graph_CNN_ortega
 from Models.CNN import ConvNet
 from dataset import IEMOCAPDataset
 
-label_folder_path = './Data/Evaluation'
-file_root = './Data/Wav'
+label_folder_path = 'Data/IEMOCAP/Evaluation'
+file_root = 'Data/IEMOCAP/Wav'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -51,8 +51,8 @@ model = ConvNet().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-# optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 max_acc = 0
 
