@@ -9,8 +9,8 @@ from Utils.FeaturesUtils import MFCC
 from Utils.GetFunction import LFCC
 
 
-def walk(label_folder_path, file_root):
-    emotions_used = {'ang': 0, 'hap': 1, 'exc': 1, 'neu': 2, 'sad': 3, }
+def walk_iemocap(label_folder_path, file_root):
+    emotions_used = {'ang': 0, 'hap': 1, 'neu': 2, 'sad': 3, }
     paths = []
     labels = []
     for root, dirs, files in os.walk(label_folder_path):
@@ -32,10 +32,31 @@ def walk(label_folder_path, file_root):
     return paths, labels_np
 
 
+def walk_ravdess(path):
+    # 'ang': 0, 'hap': 1, 'neu': 2, 'sad 3
+    emotions_used = {'05': 0, '03': 1, '01': 2, '04': 3, }
+    paths = []
+    labels = []
+    for root, dirs, files in os.walk(path):
+        for item in files:
+            label = item.split('-')
+            if len(label) == 7:
+                label = label[2]
+            else:
+                continue
+            if label in emotions_used.keys():
+                full_path = os.path.join(root, item)
+                paths.append(full_path)
+                labels.append(emotions_used[label])
+
+    labels_np = np.array(labels).reshape(-1)
+    return paths, labels_np
+
+
 class IEMOCAPDataset(Dataset):
 
     def __init__(self, label_folder_path, file_root, feature_type="MFCC", train=True):
-        self.paths, self.labels = walk(label_folder_path, file_root)
+        self.paths, self.labels = walk_iemocap(label_folder_path, file_root)
         self.n_samples = self.labels.shape[0]
         self.feature = feature_type
         random.seed(0)
@@ -43,6 +64,36 @@ class IEMOCAPDataset(Dataset):
         random.shuffle(self.series)
         num = int(self.n_samples / 5)
         if train:
+            self.series = self.series[num:]
+        else:
+            self.series = self.series[:num]
+        self.n_samples = len(self.series)
+        self.labels = torch.from_numpy(self.labels).type(torch.long)
+
+    def __getitem__(self, index):
+        feature = ''
+        if self.feature == "MFCC":
+            feature = torch.Tensor(MFCC(self.paths[self.series[index]]))
+        elif self.feature == "LFCC":
+            feature = torch.Tensor(LFCC(self.paths[self.series[index]]))
+        return feature, self.labels[self.series[index]]
+
+    def __len__(self):
+        return self.n_samples
+
+
+class RAVDESSDataset(Dataset):
+    def __init__(self, path, feature_type="MFCC", usage="all"):
+        self.paths, self.labels = walk_ravdess(path)
+        self.n_samples = self.labels.shape[0]
+        self.feature = feature_type
+        random.seed(0)
+        self.series = [inx for inx in range(self.n_samples)]
+        random.shuffle(self.series)
+        num = int(self.n_samples / 5)
+        if usage == "all":
+            self.series = self.series
+        elif usage == "train":
             self.series = self.series[num:]
         else:
             self.series = self.series[:num]

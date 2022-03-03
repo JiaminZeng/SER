@@ -4,10 +4,11 @@ import torch.nn as nn
 
 from Models.GCN import Graph_CNN_ortega
 from Models.CNN import ConvNet
-from dataset import IEMOCAPDataset
+from dataset import IEMOCAPDataset, RAVDESSDataset
 
-label_folder_path = 'Data/IEMOCAP/Evaluation'
-file_root = 'Data/IEMOCAP/Wav'
+label_folder_path = './Data/IEMOCAP/Evaluation'
+file_root = './Data/IEMOCAP/Wav'
+RAVDESS_path = './Data/RAVDESS'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

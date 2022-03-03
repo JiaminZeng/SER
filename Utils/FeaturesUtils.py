@@ -17,13 +17,12 @@ def pad(x, max_len=65200):
 # 拼接和提取mfcc函数
 def MFCC(x):
     x, sp = sf.read(x)
+    print(x.shape)
     x = pad(x)
     x = librosa.util.normalize(x)
-    mfcc = librosa.feature.mfcc(x, sr=16000, n_mfcc=32)
+    mfcc = librosa.feature.mfcc(x, sr=sp, n_mfcc=32)
     delta = librosa.feature.delta(mfcc)
-    delta2 = librosa.feature.delta(delta)
+    # delta2 = librosa.feature.delta(delta)
     feats = np.concatenate((mfcc, delta), axis=0)
     feats = np.transpose(feats)
     return feats
-
-

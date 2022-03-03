@@ -55,6 +55,10 @@ class ConvNet(nn.Module):
             nn.PReLU(256),
             nn.Linear(256, 4))
 
+        self.mul = torch.mul
+        self.softmax = torch.softmax
+        self.cat = torch.cat
+
     def forward(self, x):
         b = x.shape[0]
         x = x.view(-1, 1, 128, 64)
@@ -97,12 +101,12 @@ class ConvNet(nn.Module):
             Q = self.attention_query[i](x)
             K = self.attention_key[i](x)
             V = self.attention_value[i](x)
-            attention = F.softmax(torch.mul(Q, K).cuda(), -1).cuda()
-            attention = torch.mul(attention, V).cuda()
+            attention = self.softmax(self.mul(Q, K), -1)
+            attention = self.mul(attention, V)
             if attn is None:
                 attn = attention
             else:
-                attn = torch.cat([attn, attention], 2).cuda()
+                attn = self.cat([attn, attention], 2)
 
         x = attn
         x = x.view(b, -1)
