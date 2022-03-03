@@ -39,10 +39,18 @@ class ConvNet(nn.Module):
         self.nm5 = nn.BatchNorm2d(80)
         # rule
 
-        self.nm = nn.BatchNorm2d
+        self.attention_query = []
+        self.attention_key = []
+        self.attention_value = []
+        self.attention_heads = 4
+
+        for i in range(self.attention_heads):
+            self.attention_query.append(nn.Conv2d(80, 80, (1, 1)))
+            self.attention_key.append(nn.Conv2d(80, 80, (1, 1)))
+            self.attention_value.append(nn.Conv2d(80, 80, (1, 1)))
 
         self.classifier = nn.Sequential(
-            nn.Linear(80 * 16 * 8, 256),
+            nn.Linear(80 * 16 * 8 * 4, 256),
             nn.Dropout(p=0.5),
             nn.PReLU(256),
             nn.Linear(256, 4))
@@ -84,6 +92,19 @@ class ConvNet(nn.Module):
         x = self.nm5(x)
         x = F.relu(x)
 
+        attn = None
+        for i in range(self.attention_heads):
+            Q = self.attention_query[i](x)
+            K = self.attention_key[i](x)
+            V = self.attention_value[i](x)
+            attention = F.softmax(torch.mul(Q, K), -1)
+            attention = torch.mul(attention, V)
+            if attn is None:
+                attn = attention
+            else:
+                attn = torch.cat([attn, attention], 2)
+
+        x = attn
         x = x.view(b, -1)
         x = self.classifier(x)
         return x
