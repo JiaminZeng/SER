@@ -55,7 +55,7 @@ def walk_ravdess(path):
 
 class IEMOCAPDataset(Dataset):
 
-    def __init__(self, label_folder_path, file_root, feature_type="MFCC", train=True):
+    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all"):
         self.paths, self.labels = walk_iemocap(label_folder_path, file_root)
         self.n_samples = self.labels.shape[0]
         self.feature = feature_type
@@ -63,7 +63,9 @@ class IEMOCAPDataset(Dataset):
         self.series = [inx for inx in range(self.n_samples)]
         random.shuffle(self.series)
         num = int(self.n_samples / 5)
-        if train:
+        if usage == "all":
+            self.series = self.series
+        elif usage == "train":
             self.series = self.series[num:]
         else:
             self.series = self.series[:num]

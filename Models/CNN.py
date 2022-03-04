@@ -28,21 +28,21 @@ class ConvNet(nn.Module):
         # rule
         # maxPool
 
-        self.conv4 = nn.Conv2d(48, 64, (3, 3))
+        self.conv4 = nn.Conv2d(48, 80, (3, 3))
         self.pd4 = nn.ZeroPad2d([0, 2, 2, 0])
-        self.nm4 = nn.BatchNorm2d(64)
+        self.nm4 = nn.BatchNorm2d(80)
         # rule
         # maxPool
 
-        self.conv5 = nn.Conv2d(64, 80, (3, 3))
-        self.pd5 = nn.ZeroPad2d([0, 2, 2, 0])
-        self.nm5 = nn.BatchNorm2d(80)
+        # self.conv5 = nn.Conv2d(64, 80, (3, 3))
+        # self.pd5 = nn.ZeroPad2d([0, 2, 2, 0])
+        # self.nm5 = nn.BatchNorm2d(80)
         # rule
 
         self.attention_query = torch.nn.ModuleList()
         self.attention_key = torch.nn.ModuleList()
         self.attention_value = torch.nn.ModuleList()
-        self.attention_heads = 4
+        self.attention_heads = 8
 
         for i in range(self.attention_heads):
             self.attention_query.append(nn.Conv2d(80, 80, (1, 1)))
@@ -50,10 +50,10 @@ class ConvNet(nn.Module):
             self.attention_value.append(nn.Conv2d(80, 80, (1, 1)))
 
         self.classifier = nn.Sequential(
-            nn.Linear(80 * 16 * 8 * 4, 256),
-            nn.Dropout(p=0.5),
-            nn.PReLU(256),
-            nn.Linear(256, 4))
+            nn.Linear(80 * 16 * 8 * self.attention_heads, 512),
+            nn.Dropout(p=0.1),
+            nn.PReLU(512),
+            nn.Linear(512, 4))
 
         self.mul = torch.mul
         self.softmax = torch.softmax
@@ -91,10 +91,10 @@ class ConvNet(nn.Module):
         x = self.maxPool22(x)
         x = F.relu(x)
 
-        x = self.conv5(x)
-        x = self.pd5(x)
-        x = self.nm5(x)
-        x = F.relu(x)
+        # x = self.conv5(x)
+        # x = self.pd5(x)
+        # x = self.nm5(x)
+        # x = F.relu(x)
 
         attn = None
         for i in range(self.attention_heads):

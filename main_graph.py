@@ -38,13 +38,16 @@ A[frame_size - 1][0] = 1
 A = torch.Tensor(A).to(device)
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, train=True)
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, train=False)
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type,usage="train")
+# train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
+
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type,usage="test")
+# test_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="test")
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
-classes = ('ang', 'hap and ext', 'neu', 'sad')
+classes = ('ang', 'hap', 'neu', 'sad')
 
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
@@ -54,7 +57,6 @@ criterion = nn.CrossEntropyLoss()
 
 # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
 max_acc = 0
 
 n_total_steps = len(train_loader)
