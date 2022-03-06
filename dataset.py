@@ -10,7 +10,7 @@ from Utils.GetFunction import LFCC
 
 
 def walk_iemocap(label_folder_path, file_root):
-    emotions_used = {'ang': 0, 'hap': 1, 'neu': 2, 'sad': 3, }
+    emotions_used = {'ang': 0, 'exc': 1, 'neu': 2, 'sad': 3, }
     paths = []
     labels = []
     for root, dirs, files in os.walk(label_folder_path):

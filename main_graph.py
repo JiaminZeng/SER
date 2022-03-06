@@ -1,10 +1,8 @@
-import numpy as np
 import torch
 import torch.nn as nn
 
-from Models.GCN import Graph_CNN_ortega
-from Models.CNN import ConvNet
-from dataset import IEMOCAPDataset, RAVDESSDataset
+from Models.CNN import ConvNet,ConvNet_3
+from dataset import IEMOCAPDataset
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
 file_root = './Data/IEMOCAP/Wav'
@@ -29,29 +27,29 @@ msg = f'feature_type{feature_type}\nnum_layer{num_layer}\nframe_size{frame_size}
       f'pool_type{pool_type}\nhidden_dim{hidden_dim}\nfinal_dropout{final_dropout}'
 
 # Adj
-A = np.zeros((frame_size, frame_size))
-for i in range(frame_size - 1):
-    A[i][i + 1] = 1
-    A[i + 1][i] = 1
-A[0][frame_size - 1] = 1
-A[frame_size - 1][0] = 1
-A = torch.Tensor(A).to(device)
+# A = np.zeros((frame_size, frame_size))
+# for i in range(frame_size - 1):
+#     A[i][i + 1] = 1
+#     A[i + 1][i] = 1
+# A[0][frame_size - 1] = 1
+# A[frame_size - 1][0] = 1
+# A = torch.Tensor(A).to(device)
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type,usage="train")
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train")
 # train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
 
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type,usage="test")
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test")
 # test_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="test")
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
-classes = ('ang', 'hap', 'neu', 'sad')
+classes = ('ang', 'exc', 'neu', 'sad')
 
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
-model = ConvNet().to(device)
+model = ConvNet_3().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
