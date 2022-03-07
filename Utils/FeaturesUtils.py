@@ -25,9 +25,9 @@ def MFCC(x):
 
     x = librosa.util.normalize(x)
     mfcc = librosa.feature.mfcc(x, sr=sp, n_mfcc=32)
-    delta = librosa.feature.delta(mfcc)
-    feats = np.concatenate((mfcc, delta), axis=0)
-    feats = np.transpose(feats)
+    # delta = librosa.feature.delta(mfcc)
+    # feats = np.concatenate((mfcc, delta), axis=0)
+    feats = np.transpose(mfcc)
     return feats
 
 # f = r"../Data/RAVDESS/Actor_12/03-01-04-02-01-02-12.wav"

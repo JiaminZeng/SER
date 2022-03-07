@@ -1,6 +1,9 @@
 import os
 import random
 
+import soundfile as sf
+import librosa
+import nlpaug.augmenter.audio as naa
 import numpy as np
 import torch
 from torch.utils.data.dataset import Dataset
@@ -9,7 +12,15 @@ from Utils.FeaturesUtils import MFCC
 from Utils.GetFunction import LFCC
 
 
-def walk_iemocap(label_folder_path, file_root):
+def generator(path):
+    aug = naa.VtlpAug(16000, zone=(0.0, 1.0), coverage=1, fhi=4800, factor=(0.8, 1.2))
+    for i in range(7):
+        wav, _ = librosa.load(path, 16000)
+        wavAug = aug.augment(wav)
+        sf.write(path + '_' + str(i)+'.wav', wavAug, 16000)
+
+
+def walk_iemocap(label_folder_path, file_root, use=False):
     emotions_used = {'ang': 0, 'exc': 1, 'neu': 2, 'sad': 3, }
     paths = []
     labels = []
@@ -28,6 +39,10 @@ def walk_iemocap(label_folder_path, file_root):
                                 audio_file_path = os.path.join(file_root, audio_folder_path, blocks[1] + '.wav')
                                 paths.append(audio_file_path)
                                 labels.append(label)
+                                if use:
+                                    for i in range(7):
+                                        paths.append(audio_file_path + '_' + str(i))
+                                        labels.append(label)
     labels_np = np.array(labels).reshape(-1)
     return paths, labels_np
 
@@ -112,3 +127,10 @@ class RAVDESSDataset(Dataset):
 
     def __len__(self):
         return self.n_samples
+
+
+# label_folder_path = './Data/IEMOCAP/Evaluation'
+# file_root = './Data/IEMOCAP/Wav'
+# paths, _ = walk_iemocap(label_folder_path, file_root)
+# for item in paths:
+#     generator(item)

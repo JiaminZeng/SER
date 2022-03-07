@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 
 from Models.CNN import ConvNet,ConvNet_3
+from Models.ACNN import ACC
+
 from dataset import IEMOCAPDataset
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
@@ -49,7 +51,7 @@ classes = ('ang', 'exc', 'neu', 'sad')
 
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
-model = ConvNet_3().to(device)
+model = ACC().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
