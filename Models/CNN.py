@@ -50,7 +50,7 @@ class ConvNet(nn.Module):
             self.attention_value.append(nn.Conv2d(80, 80, (1, 1)))
 
         self.classifier = nn.Sequential(
-            nn.Linear(80 * 16 * 8 * self.attention_heads, 512),
+            nn.Linear(40960, 512),
             nn.Dropout(p=0.1),
             nn.PReLU(512),
             nn.Linear(512, 4))
@@ -186,12 +186,12 @@ class ConvNet_0(nn.Module):
 class ConvNet_1(nn.Module):
     def __init__(self):
         super(ConvNet_1, self).__init__()
-        self.conv1_1 = nn.Conv2d(1, 8, (10, 2))
-        self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
-        self.nm1_1 = nn.BatchNorm2d(8)
-        self.conv1_2 = nn.Conv2d(1, 8, (2, 8))
-        self.pd1_2 = nn.ZeroPad2d([0, 7, 1, 0])
-        self.nm1_2 = nn.BatchNorm2d(8)
+        self.conv1_1 = nn.Conv2d(1, 16, (10, 5))
+        self.pd1_1 = nn.ZeroPad2d([0, 4, 9, 0])
+        self.nm1_1 = nn.BatchNorm2d(16)
+        self.conv1_2 = nn.Conv2d(1, 8, (5, 10))
+        self.pd1_2 = nn.ZeroPad2d([0, 9, 4, 0])
+        self.nm1_2 = nn.BatchNorm2d(16)
 
         # concatenate
         # rule
@@ -311,6 +311,7 @@ class ConvNet_1(nn.Module):
                 attn = self.cat([attn, attention], 2)
 
         x = attn
+        x = F.relu(x)
         x = x.view(b, -1)
         x = self.classifier(x)
         return x
@@ -467,7 +468,6 @@ class ConvNet_3(nn.Module):
         x = self.pd5(x)
         x = self.nm5(x)
         x = F.relu(x)
-
 
         x = x.view(b, -1)
         x = self.classifier(x)

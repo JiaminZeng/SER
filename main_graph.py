@@ -1,10 +1,13 @@
 import torch
 import torch.nn as nn
+from warnings import simplefilter
 
 from Models.CNN import ConvNet,ConvNet_3
-from Models.ACNN import ACC
+from Models.ACNN import ACC1,ACC2
 
 from dataset import IEMOCAPDataset
+
+simplefilter(action='ignore', category=FutureWarning)
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
 file_root = './Data/IEMOCAP/Wav'
@@ -14,8 +17,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
 num_epochs = 200
-batch_size = 16
-learning_rate = 0.001
+batch_size = 32
+learning_rate = 0.0001
 
 feature_type = "MFCC"
 num_layer = 2
@@ -51,7 +54,7 @@ classes = ('ang', 'exc', 'neu', 'sad')
 
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
-model = ACC().to(device)
+model = ConvNet().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
