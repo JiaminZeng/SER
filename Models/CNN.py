@@ -51,7 +51,7 @@ class ConvNet(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Linear(40960, 512),
-            nn.Dropout(p=0.1),
+            nn.Dropout(p=0.5),
             nn.PReLU(512),
             nn.Linear(512, 4))
 
@@ -106,9 +106,10 @@ class ConvNet(nn.Module):
             if attn is None:
                 attn = attention
             else:
-                attn = self.cat([attn, attention], 2)
+                attn = self.cat([attn, attention], 1)
 
         x = attn
+        x = F.relu(x)
         x = x.view(b, -1)
         x = self.classifier(x)
         return x

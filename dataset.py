@@ -70,9 +70,11 @@ def walk_ravdess(path):
 
 class IEMOCAPDataset(Dataset):
 
-    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all"):
-        self.paths, self.labels = walk_iemocap(label_folder_path, file_root)
+    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all", aug=False):
+        self.paths, self.labels = walk_iemocap(label_folder_path, file_root, aug)
         self.n_samples = self.labels.shape[0]
+        if aug:
+            self.n_samples //= 8
         self.feature = feature_type
         random.seed(0)
         self.series = [inx for inx in range(self.n_samples)]
@@ -84,6 +86,14 @@ class IEMOCAPDataset(Dataset):
             self.series = self.series[num:]
         else:
             self.series = self.series[:num]
+        if aug:
+            temp = []
+            for item in self.series:
+                for inx in range(8):
+                    temp.append(item * 8 + inx)
+            self.series = temp
+            random.shuffle(self.series)
+        print(self.series)
         self.n_samples = len(self.series)
         self.labels = torch.from_numpy(self.labels).type(torch.long)
 
