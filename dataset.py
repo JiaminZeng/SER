@@ -93,7 +93,6 @@ class IEMOCAPDataset(Dataset):
                     temp.append(item * 8 + inx)
             self.series = temp
             random.shuffle(self.series)
-        print(self.series)
         self.n_samples = len(self.series)
         self.labels = torch.from_numpy(self.labels).type(torch.long)
 

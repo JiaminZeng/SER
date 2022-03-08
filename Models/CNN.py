@@ -61,7 +61,7 @@ class ConvNet(nn.Module):
 
     def forward(self, x):
         b = x.shape[0]
-        x = x.view(-1, 1, 128, 64)
+        x = x.view(-1, 1, 128, 32)
         xx = self.conv1_1(x)
         xx = self.pd1_1(xx)
         xx = self.nm1_1(xx)
