@@ -2,22 +2,26 @@ from warnings import simplefilter
 
 import torch
 import torch.nn as nn
+simplefilter(action='ignore', category=FutureWarning)
 
-from Models.CNN import ConvNet
+from Models.ACNN import *
 from dataset import IEMOCAPDataset
 
-simplefilter(action='ignore', category=FutureWarning)
+num_epochs = 100
+batch_size = 16
+learning_rate = 0.001
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = ACCN_1_0().to(device)
+
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
 file_root = './Data/IEMOCAP/Wav'
 RAVDESS_path = './Data/RAVDESS'
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 200
-batch_size = 128
-learning_rate = 0.001
+
 
 feature_type = "MFCC"
 num_layer = 2
@@ -26,9 +30,9 @@ input_dim = 64
 pool_type = "sum"
 hidden_dim = 128
 final_dropout = 0.5
-
-msg = f'feature_type{feature_type}\nnum_layer{num_layer}\nframe_size{frame_size}\nimput_dim{input_dim}\n' \
-      f'pool_type{pool_type}\nhidden_dim{hidden_dim}\nfinal_dropout{final_dropout}'
+#
+# msg = f'feature_type{feature_type}\nnum_layer{num_layer}\nframe_size{frame_size}\nimput_dim{input_dim}\n' \
+#       f'pool_type{pool_type}\nhidden_dim{hidden_dim}\nfinal_dropout{final_dropout}'
 
 # Adj
 # A = np.zeros((frame_size, frame_size))
@@ -53,7 +57,7 @@ classes = ('ang', 'exc', 'neu', 'sad')
 
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
-model = ConvNet().to(device)
+# model = ACCN().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -111,4 +115,5 @@ for epoch in range(num_epochs):
         print(f'Best result: {max_acc} %')
         print(f'------------------------')
 
-print(msg)
+print(model.name)
+print(f'batch:{batch_size},lr:{learning_rate}')
