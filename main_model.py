@@ -7,12 +7,12 @@ simplefilter(action='ignore', category=FutureWarning)
 from Models.ACNN import *
 from dataset import IEMOCAPDataset
 
-num_epochs = 100
+num_epochs = 200
 batch_size = 16
 learning_rate = 0.001
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_1_0().to(device)
+model = ACCN_BASE().to(device)
 
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
