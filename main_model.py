@@ -12,7 +12,7 @@ batch_size = 16
 learning_rate = 0.001
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_BASE().to(device)
+model = ACCN_2_1().to(device)
 
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
