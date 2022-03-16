@@ -5,6 +5,7 @@ import torch.nn as nn
 simplefilter(action='ignore', category=FutureWarning)
 
 # from Models.ACNN import *
+from Models.AreaAttention import ACCN_Area_0_0
 from Models.SelfAttnCompare import ACCN_Torch_0_0
 from dataset import IEMOCAPDataset
 
@@ -13,7 +14,7 @@ batch_size = 16
 learning_rate = 0.001
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_Torch_0_0().to(device)
+model = ACCN_Area_0_0().to(device)
 feature_type = "MFCC"
 
 

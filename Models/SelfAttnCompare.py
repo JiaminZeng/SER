@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 class ACCN_Torch_0_0(nn.Module):
     """
-
+        63.22
     """
 
     def __init__(self):
@@ -115,8 +115,7 @@ class ACCN_Torch_0_0(nn.Module):
 
 class ACCN_0_0(nn.Module):
     """
-        batch = 16,lr=0.001 acc=60.79
-
+        batch = 16,lr=0.001 acc=60.79,61
     """
 
     def __init__(self):
