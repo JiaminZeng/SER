@@ -4,7 +4,8 @@ import torch
 import torch.nn as nn
 simplefilter(action='ignore', category=FutureWarning)
 
-from Models.ACNN import *
+# from Models.ACNN import *
+from Models.SelfAttnCompare import ACCN_Torch_0_0
 from dataset import IEMOCAPDataset
 
 num_epochs = 200
@@ -12,7 +13,8 @@ batch_size = 16
 learning_rate = 0.001
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_2_1().to(device)
+model = ACCN_Torch_0_0().to(device)
+feature_type = "MFCC"
 
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
@@ -23,13 +25,12 @@ RAVDESS_path = './Data/RAVDESS'
 # Hyper-parameters
 
 
-feature_type = "MFCC"
-num_layer = 2
-frame_size = 128
-input_dim = 64
-pool_type = "sum"
-hidden_dim = 128
-final_dropout = 0.5
+# num_layer = 2
+# frame_size = 128
+# input_dim = 64
+# pool_type = "sum"
+# hidden_dim = 128
+# final_dropout = 0.5
 #
 # msg = f'feature_type{feature_type}\nnum_layer{num_layer}\nframe_size{frame_size}\nimput_dim{input_dim}\n' \
 #       f'pool_type{pool_type}\nhidden_dim{hidden_dim}\nfinal_dropout{final_dropout}'
@@ -63,6 +64,8 @@ criterion = nn.CrossEntropyLoss()
 
 # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+# torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
+
 max_acc = 0
 
 n_total_steps = len(train_loader)

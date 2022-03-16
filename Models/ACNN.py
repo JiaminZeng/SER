@@ -1,7 +1,7 @@
 import torch.functional
 import torch.nn as nn
 import torch.nn.functional as F
-
+import area_attention
 
 class ACCN_BASE(nn.Module):
 
@@ -65,42 +65,42 @@ class ACCN_BASE(nn.Module):
         xx = self.pd1_1(xx)
         xx = self.nm1_1(xx)
         xx = F.relu(xx)
-        # print(1, xx.shape)
+        print(1, xx.shape)
 
         yy = self.conv1_2(x)
         yy = self.pd1_2(yy)
         yy = self.nm1_2(yy)
         yy = F.relu(yy)
-        # print(2, yy.shape)
+        print(2, yy.shape)
 
         x = torch.cat([xx, yy], dim=2)
-        # print(3, x.shape)
+        print(3, x.shape)
 
         x = self.conv2(x)
         x = self.pd2(x)
         x = self.nm2(x)
         x = F.relu(x)
         x = self.maxPool22(x)
-        # print(4, x.shape)
+        print(4, x.shape)
 
         x = self.conv3(x)
         x = self.pd3(x)
         x = self.nm3(x)
         x = F.relu(x)
         x = self.maxPool22(x)
-        # print(5, x.shape)
+        print(5, x.shape)
 
         x = self.conv4(x)
         x = self.pd4(x)
         x = self.nm4(x)
         x = F.relu(x)
-        # print(6, x.shape)
+        print(6, x.shape)
 
         x = self.conv5(x)
         x = self.pd5(x)
         x = self.nm5(x)
         x = F.relu(x)
-        # print(7, x.shape)
+        print(7, x.shape)
 
         attn = None
         for i in range(self.attention_heads):
@@ -114,23 +114,23 @@ class ACCN_BASE(nn.Module):
             else:
                 attn = self.cat([attn, attention], 3)
 
-        # print(8, x.shape)
+        print(8, x.shape)
 
         x = attn.transpose(1, 2)
         x = x.transpose(2, 3)
-        # print(9, x.shape)
+        print(9, x.shape)
 
         x = F.relu(x)
-        # print(10, x.shape)
+        print(10, x.shape)
 
         x = self.avg(x)
-        # print(11, x.shape)
+        print(11, x.shape)
 
         x = x.view(b, -1)
-        # print(12, x.shape)
+        print(12, x.shape)
 
         x = self.classifier(x)
-        # print(13, x.shape)
+        print(13, x.shape)
 
         return x
 
@@ -560,9 +560,9 @@ class CCN_1_1(nn.Module):
         return x
 
 
-class ACCN_2_0(nn.Module):
+class CCN_2_0(nn.Module):
     def __init__(self):
-        super(ACCN_2_0, self).__init__()
+        super(CCN_2_0, self).__init__()
         self.name = "2_0"
         self.conv1_1 = nn.Conv2d(1, 16, (10, 2))
         self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
@@ -676,7 +676,7 @@ class ACCN_2_0(nn.Module):
 
 class ACCN_2_1(nn.Module):
     """
-        batch:16,lr:0.001:58.76393110435664
+        batch:16,lr:0.001:  58.76393110435664
     """
 
     def __init__(self):
@@ -815,7 +815,7 @@ class ACCN_2_1(nn.Module):
 class ACCN_2_2(nn.Module):
     def __init__(self):
         """
-            batch:16,lr:0.001:59.6757852077001
+            batch:16,lr:0.001:  59.6757852077001
         """
         super(ACCN_2_2, self).__init__()
         self.name = "2_2"
@@ -962,7 +962,7 @@ class ACCN_2_2(nn.Module):
 class ACCN_2_3(nn.Module):
     def __init__(self):
         """
-        batch:16,lr:0.001:60.790273556231
+        batch:16,lr:0.001:  60.790273556231
         """
         super(ACCN_2_3, self).__init__()
         self.name = "2_3"
@@ -1110,7 +1110,7 @@ if __name__ == '__main__':
     import numpy as np
 
     model = ACCN_BASE()
-    test = np.random.random((16, 128, 32, 1)).astype(np.float32)
+    np.random.seed(1)
+    test = np.random.random((16, 1, 128, 32)).astype(np.float32)
     x = torch.from_numpy(test)
-    # model(x)
     print(model(x))
