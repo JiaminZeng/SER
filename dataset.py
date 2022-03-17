@@ -71,7 +71,7 @@ def walk_ravdess(path):
 class IEMOCAPDataset(Dataset):
 
     def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all", aug=False, seg=False):
-        self.paths, self.labels = walk_iemocap(label_folder_path, file_root, aug)
+        self.paths, self.labels = walk_iemocap(label_folder_path, file_root, use=aug)
         self.n_samples = self.labels.shape[0]
         self.seg = seg
         if aug:
@@ -99,11 +99,11 @@ class IEMOCAPDataset(Dataset):
         if seg:
             self.features = []
             self.temp_labels = []
-            for i in range(self.n_samples):
-                ret = Seg_MFCC(self.paths[i])
+            for id in self.series:
+                ret = Seg_MFCC(self.paths[id])
                 for item in ret:
                     self.features.append(torch.Tensor(item))
-                    self.temp_labels.append(self.labels[i])
+                    self.temp_labels.append(self.labels[id])
             self.labels = np.array(self.temp_labels).reshape(-1)
             self.n_samples = len(self.labels)
             self.series = [inx for inx in range(self.n_samples)]
@@ -158,6 +158,7 @@ class RAVDESSDataset(Dataset):
 
 if __name__ == "__main__":
     from warnings import simplefilter
+
     simplefilter(action='ignore', category=FutureWarning)
     label_folder_path = './Data/IEMOCAP/Evaluation'
     file_root = './Data/IEMOCAP/Wav'
