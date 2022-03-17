@@ -25,16 +25,17 @@ def Seg_MFCC(x):
     while inx + rate * 2 <= length:
         ed = inx + rate * 2
         t = x[inx:ed]
-        t = librosa.util.normalize(t)
         mfcc = librosa.feature.mfcc(t, sr=sp, n_mfcc=32)
+        mfcc = np.transpose(mfcc)
         features.append(mfcc)
-        inx += rate
+        inx += int(rate * 0.4)
     if length - rate * 2 >= 0:
         t = x[max(0, length - rate * 2):]
-        t = librosa.util.normalize(t)
         mfcc = librosa.feature.mfcc(t, sr=sp, n_mfcc=32)
+        mfcc = np.transpose(mfcc)
         features.append(mfcc)
     return features
+
 
 def MFCC(x):
     x, sp = sf.read(x)

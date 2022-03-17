@@ -6,7 +6,7 @@ import torch.nn as nn
 simplefilter(action='ignore', category=FutureWarning)
 
 # from Models.ACNN import *
-from Models.SelfAttnCompare import ACCN_Torch_0_0
+from Models.SelfAttnCompare import ACCN_Torch_0_0,ACCN_Time
 # from Models.AreaAttention import ACCN_Area_0_0
 from dataset import IEMOCAPDataset
 
@@ -15,7 +15,7 @@ batch_size = 16
 learning_rate = 0.001
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_Torch_0_0().to(device)
+model = ACCN_Time().to(device)
 feature_type = "MFCC"
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
@@ -45,10 +45,10 @@ RAVDESS_path = './Data/RAVDESS'
 # A = torch.Tensor(A).to(device)
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", aug=True)
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", seg=True)
 # train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
 
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test", aug=True)
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test", seg=True)
 # test_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="test")
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
@@ -56,6 +56,8 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 classes = ('ang', 'exc', 'neu', 'sad')
 
+print(train_dataset.n_samples)
+print(test_dataset.n_samples)
 # model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
 #                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
 # model = ACCN().to(device)
