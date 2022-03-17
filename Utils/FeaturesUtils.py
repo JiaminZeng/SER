@@ -15,9 +15,29 @@ def pad(x, max_len=65200):
 
 
 # 拼接和提取mfcc函数
+
+def Seg_MFCC(x):
+    x, sp = sf.read(x)
+    rate = sp
+    features = []
+    length = len(x)
+    inx = 0
+    while inx + rate * 2 <= length:
+        ed = inx + rate * 2
+        t = x[inx:ed]
+        t = librosa.util.normalize(t)
+        mfcc = librosa.feature.mfcc(t, sr=sp, n_mfcc=32)
+        features.append(mfcc)
+        inx += rate
+    if length - rate * 2 >= 0:
+        t = x[max(0, length - rate * 2):]
+        t = librosa.util.normalize(t)
+        mfcc = librosa.feature.mfcc(t, sr=sp, n_mfcc=32)
+        features.append(mfcc)
+    return features
+
 def MFCC(x):
     x, sp = sf.read(x)
-
     if len(x.shape) == 2:
         x = x[:, 0] + x[:, 1]
         x = x / 2
@@ -30,5 +50,10 @@ def MFCC(x):
     feats = np.transpose(mfcc)
     return feats
 
-# f = r"../Data/RAVDESS/Actor_12/03-01-04-02-01-02-12.wav"
-# MFCC(f)
+
+if __name__ == "__main__":
+    f = r"../Data/IEMOCAP/Wav/Ses01F_impro01/Ses01F_impro01_F004.wav"
+    ret = Seg_MFCC(f)
+    for i in ret:
+        print(i.shape)
+    # print(Seg_MFCC(f)[1].shape)

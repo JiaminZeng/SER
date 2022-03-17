@@ -8,13 +8,13 @@ import soundfile as sf
 import torch
 from torch.utils.data.dataset import Dataset
 
-from Utils.FeaturesUtils import MFCC
+from Utils.FeaturesUtils import Seg_MFCC, MFCC
 from Utils.GetFunction import LFCC
 
 
 def generator(path):
     aug = naa.VtlpAug(16000, zone=(0.0, 1.0), coverage=1, fhi=4800, factor=(0.8, 1.2))
-    for i in range(7):
+    for i in range(7):  # 0-7
         wav, _ = librosa.load(path, 16000)
         wavAug = aug.augment(wav)
         sf.write(path + '_' + str(i) + '.wav', wavAug, 16000)
@@ -70,9 +70,10 @@ def walk_ravdess(path):
 
 class IEMOCAPDataset(Dataset):
 
-    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all", aug=False):
+    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all", aug=False, seg=False):
         self.paths, self.labels = walk_iemocap(label_folder_path, file_root, aug)
         self.n_samples = self.labels.shape[0]
+        self.seg = seg
         if aug:
             self.n_samples //= 8
         self.feature = feature_type
@@ -93,16 +94,31 @@ class IEMOCAPDataset(Dataset):
                     temp.append(item * 8 + inx)
             self.series = temp
             random.shuffle(self.series)
+
         self.n_samples = len(self.series)
+        if seg:
+            self.features = []
+            self.temp_labels = []
+            for i in range(self.n_samples):
+                ret = Seg_MFCC(self.paths[i])
+                for item in ret:
+                    self.features.append(torch.Tensor(item))
+                    self.temp_labels.append(self.labels[i])
+            self.labels = np.array(self.temp_labels).reshape(-1)
+            self.n_samples = len(self.labels)
+            self.series = [inx for inx in range(self.n_samples)]
         self.labels = torch.from_numpy(self.labels).type(torch.long)
 
     def __getitem__(self, index):
-        feature = ''
+        id = self.series[index]
+        if self.seg:
+            return self.features[id], self.labels[id]
+        feature = None
         if self.feature == "MFCC":
-            feature = torch.Tensor(MFCC(self.paths[self.series[index]]))
+            feature = torch.Tensor(MFCC(self.paths[id]))
         elif self.feature == "LFCC":
-            feature = torch.Tensor(LFCC(self.paths[self.series[index]]))
-        return feature, self.labels[self.series[index]]
+            feature = torch.Tensor(LFCC(self.paths[id]))
+        return feature, self.labels[id]
 
     def __len__(self):
         return self.n_samples
@@ -137,8 +153,11 @@ class RAVDESSDataset(Dataset):
     def __len__(self):
         return self.n_samples
 
-# label_folder_path = './Data/IEMOCAP/Evaluation'
-# file_root = './Data/IEMOCAP/Wav'
-# paths, _ = walk_iemocap(label_folder_path, file_root)
-# for item in paths:
-#     generator(item)
+
+if __name__ == "__main__":
+    from warnings import simplefilter
+    simplefilter(action='ignore', category=FutureWarning)
+    label_folder_path = './Data/IEMOCAP/Evaluation'
+    file_root = './Data/IEMOCAP/Wav'
+    train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type="MFCC", usage="train", seg=True)
+    print(train_dataset.n_samples)

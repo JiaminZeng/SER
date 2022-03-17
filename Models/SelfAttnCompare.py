@@ -10,6 +10,7 @@ import torch.nn.functional as F
 class ACCN_Torch_0_0(nn.Module):
     """
         63.22
+        +aug 64.23
     """
 
     def __init__(self):

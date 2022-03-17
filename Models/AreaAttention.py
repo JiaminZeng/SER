@@ -6,7 +6,8 @@ import torch.nn.functional as F
 
 class ACCN_Area_0_0(nn.Module):
     """
-
+        normal:62.10
+        +aug:64.33
     """
 
     def __init__(self):
