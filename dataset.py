@@ -27,7 +27,7 @@ def walk_iemocap(label_folder_path, file_root, use=False):
     for root, dirs, files in os.walk(label_folder_path):
         for item in files:
             full_path = os.path.join(root, item)
-            if 'Ses' in full_path:
+            if 'Ses' in full_path and 'script' in full_path: #impro 70.85,
                 audio_folder_path = item.split('.')[0]
                 with open(full_path, 'r') as f:
                     for line in f:
@@ -77,7 +77,7 @@ class IEMOCAPDataset(Dataset):
         if aug:
             self.n_samples //= 8
         self.feature = feature_type
-        random.seed(0)
+        random.seed(321)  # 321
         self.series = [inx for inx in range(self.n_samples)]
         random.shuffle(self.series)
         num = int(self.n_samples / 5)
@@ -96,7 +96,7 @@ class IEMOCAPDataset(Dataset):
             random.shuffle(self.series)
 
         self.n_samples = len(self.series)
-        if seg:
+        if seg: # 63.1
             self.features = []
             self.temp_labels = []
             for id in self.series:

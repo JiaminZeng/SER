@@ -6,7 +6,7 @@ import torch.nn as nn
 simplefilter(action='ignore', category=FutureWarning)
 
 # from Models.ACNN import *
-from Models.SelfAttnCompare import ACCN_Torch_0_0,ACCN_Time
+from Models.SelfAttnCompare import ACCN_Time
 # from Models.AreaAttention import ACCN_Area_0_0
 from dataset import IEMOCAPDataset
 
@@ -45,7 +45,8 @@ RAVDESS_path = './Data/RAVDESS'
 # A = torch.Tensor(A).to(device)
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", seg=True)
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", aug=True,
+                               seg=True)
 # train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
 
 test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test", seg=True)
@@ -66,7 +67,7 @@ criterion = nn.CrossEntropyLoss()
 
 # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-# torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
+torch.optim.lr_scheduler.StepLR(optimizer, 30, gamma=0.5, last_epoch=-1)
 
 max_acc = 0
 
@@ -84,7 +85,7 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
 
-        if (i + 1) % 30 == 0:
+        if (i + 1) % 100 == 0:
             print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
 
     with torch.no_grad():
