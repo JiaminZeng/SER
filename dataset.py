@@ -4,6 +4,7 @@ import random
 import librosa
 import nlpaug.augmenter.audio as naa
 import numpy as np
+import pandas as pd
 import soundfile as sf
 import torch
 from torch.utils.data.dataset import Dataset
@@ -27,7 +28,7 @@ def walk_iemocap(label_folder_path, file_root, use=False):
     for root, dirs, files in os.walk(label_folder_path):
         for item in files:
             full_path = os.path.join(root, item)
-            if 'Ses' in full_path and 'script' in full_path: #impro 70.85,
+            if 'Ses' in full_path and 'impro' in full_path:  # impro 70.85,
                 audio_folder_path = item.split('.')[0]
                 with open(full_path, 'r') as f:
                     for line in f:
@@ -96,7 +97,7 @@ class IEMOCAPDataset(Dataset):
             random.shuffle(self.series)
 
         self.n_samples = len(self.series)
-        if seg: # 63.1
+        if seg:  # 63.1
             self.features = []
             self.temp_labels = []
             for id in self.series:
@@ -156,11 +157,38 @@ class RAVDESSDataset(Dataset):
         return self.n_samples
 
 
+def get_iemocap(label_folder_path, file_root):
+    result = []
+    save_path = './Result/iemocap.csv'
+    for root, dirs, files in os.walk(label_folder_path):
+        for item in files:
+            full_path = os.path.join(root, item)
+            if 'Ses' in full_path:
+                audio_folder_path = item.split('.')[0]
+                with open(full_path, 'r') as f:
+                    for line in f:
+                        if 'Ses' in line:
+                            blocks = line.split('\t')
+                            label = blocks[2]
+                            audio_file_path = os.path.join(file_root, audio_folder_path, blocks[1] + '.wav')
+                            emotion_type = 'script'
+                            if 'impro' in full_path:
+                                emotion_type = 'impro'
+                            x, sp = sf.read(audio_file_path)
+                            time = len(x) / sp
+                            result.append([audio_file_path, emotion_type, label, time])
+    result = np.array(result)
+    pd_data = pd.DataFrame(result, columns=['audio_path', 'generator_type', 'emotion_type', 'time'])
+    pd_data.to_csv(save_path)
+    print(pd_data)
+
+
 if __name__ == "__main__":
     from warnings import simplefilter
 
     simplefilter(action='ignore', category=FutureWarning)
     label_folder_path = './Data/IEMOCAP/Evaluation'
     file_root = './Data/IEMOCAP/Wav'
-    train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type="MFCC", usage="train", seg=True)
-    print(train_dataset.n_samples)
+    get_iemocap(label_folder_path, file_root)
+    # train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type="MFCC", usage="train", seg=True)
+    # print(train_dataset.n_samples)

@@ -53,8 +53,9 @@ def MFCC(x):
 
 
 if __name__ == "__main__":
-    f = r"../Data/IEMOCAP/Wav/Ses01F_impro01/Ses01F_impro01_F004.wav"
-    ret = Seg_MFCC(f)
-    for i in ret:
-        print(i.shape)
+    f = r"../Data/IEMOCAP/Wav/Ses03M_impro07/Ses03M_impro07_M007.wav"
+    ret = MFCC(f)
+    np.savetxt('./out', ret, fmt="%.5e", delimiter=',')
+    print(ret)
+    # print(ret.head(5))
     # print(Seg_MFCC(f)[1].shape)
