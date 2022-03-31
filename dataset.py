@@ -9,7 +9,7 @@ import soundfile as sf
 import torch
 from torch.utils.data.dataset import Dataset
 
-from Utils.FeaturesUtils import Seg_MFCC, MFCC, Seg_MFCC_S
+from Utils.FeaturesUtils import MFCC, Seg_MFCC_S
 from Utils.GetFunction import LFCC
 
 
@@ -97,31 +97,29 @@ class IEMOCAPDataset(Dataset):
             random.shuffle(self.series)
 
         self.n_samples = len(self.series)
-        if seg:  # 63.1
-            self.features = []
-            self.temp_labels = []
+        self.features = []
+        self.temp_labels = []
+        if seg:
             for id in self.series:
                 ret = Seg_MFCC_S(self.paths[id])
                 for item in ret:
                     self.features.append(torch.Tensor(item))
                     self.temp_labels.append(self.labels[id])
-            self.labels = np.array(self.temp_labels).reshape(-1)
-            self.n_samples = len(self.labels)
-            self.series = [inx for inx in range(self.n_samples)]
-            random.shuffle(self.series)
-
+        else:
+            for id in self.series:
+                ret = MFCC(self.paths[id])
+                self.features.append(ret)
+                self.temp_labels.append(self.labels[id])
+        self.labels = np.array(self.temp_labels).reshape(-1)
+        self.n_samples = len(self.labels)
+        self.series = [inx for inx in range(self.n_samples)]
+        random.shuffle(self.series)
+        self.features = torch.Tensor(self.features)
         self.labels = torch.from_numpy(self.labels).type(torch.long)
 
     def __getitem__(self, index):
         id = self.series[index]
-        if self.seg:
-            return self.features[id], self.labels[id]
-        feature = None
-        if self.feature == "MFCC":
-            feature = torch.Tensor(MFCC(self.paths[id]))
-        elif self.feature == "LFCC":
-            feature = torch.Tensor(LFCC(self.paths[id]))
-        return feature, self.labels[id]
+        return self.features[id], self.labels[id]
 
     def __len__(self):
         return self.n_samples

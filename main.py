@@ -1,13 +1,12 @@
 from warnings import simplefilter
 
 import torch
-import torch.nn as nn
 
 simplefilter(action='ignore', category=FutureWarning)
 
-# from Models.ACNN import *
+from Models.ACNN import *
 # from Models.SelfAttnCompare import ACCN_Time, ACCN_Torch_GAP
-from Models.AreaAttention import ACCN_Area_Multi
+# from Models.AreaAttention import ACCN_Area_Multi
 from dataset import IEMOCAPDataset
 
 num_epochs = 100
@@ -15,40 +14,18 @@ batch_size = 16
 learning_rate = 0.001
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_Area_Multi().to(device)
+model = ACCN_BASE().to(device)
 feature_type = "MFCC"
 
 label_folder_path = './Data/IEMOCAP/Evaluation'
 file_root = './Data/IEMOCAP/Wav'
 RAVDESS_path = './Data/RAVDESS'
 
-# Hyper-parameters
-
-
-# num_layer = 2
-# frame_size = 128
-# input_dim = 64
-# pool_type = "sum"
-# hidden_dim = 128
-# final_dropout = 0.5
-#
-# msg = f'feature_type{feature_type}\nnum_layer{num_layer}\nframe_size{frame_size}\nimput_dim{input_dim}\n' \
-#       f'pool_type{pool_type}\nhidden_dim{hidden_dim}\nfinal_dropout{final_dropout}'
-
-# Adj
-# A = np.zeros((frame_size, frame_size))
-# for i in range(frame_size - 1):
-#     A[i][i + 1] = 1
-#     A[i + 1][i] = 1
-# A[0][frame_size - 1] = 1
-# A[frame_size - 1][0] = 1
-# A = torch.Tensor(A).to(device)
-
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", seg=True)
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train")
 # train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
 
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test", seg=True)
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test")
 # test_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="test")
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
@@ -58,9 +35,6 @@ classes = ('ang', 'exc', 'neu', 'sad')
 
 print(train_dataset.n_samples)
 print(test_dataset.n_samples)
-# model = Graph_CNN_ortega(num_layers=num_layer, input_dim=input_dim, hidden_dim=hidden_dim, output_dim=4,
-#                          final_dropout=final_dropout, graph_pooling_type=pool_type, device=device, adj=A).to(device)
-# model = ACCN().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -68,25 +42,24 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 torch.optim.lr_scheduler.StepLR(optimizer, 30, gamma=0.5, last_epoch=-1)
 
-max_acc = 0
 
-n_total_steps = len(train_loader)
-for epoch in range(num_epochs):
-    for i, (features, labels) in enumerate(train_loader):
-        features = features.to(device)
-        labels = labels.to(device)
-        # Forward pass
-        outputs = model(features)
-        loss = criterion(outputs, labels)
+def train(features, labels):
+    features = features.to(device)
+    labels = labels.to(device)
+    # Forward pass
+    outputs = model(features)
+    loss = criterion(outputs, labels)
 
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    # Backward and optimize
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-        if (i + 1) % 100 == 0:
-            print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
+    if (i + 1) % 100 == 0:
+        print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
 
+
+def test(max_ua, max_wa):
     with torch.no_grad():
         n_correct = 0
         n_samples = 0
@@ -109,16 +82,32 @@ for epoch in range(num_epochs):
                     n_class_correct[label] += 1
                 n_class_samples[label] += 1
 
-        acc = 100.0 * n_correct / n_samples
-        if acc > max_acc:
-            max_acc = acc
-        print(f'Accuracy of the network: {acc} %')
+        ua = 100.0 * n_correct / n_samples
+        if ua > max_ua:
+            max_ua = ua
+        print(f'UA: {ua} %')
 
+        wa = 0
         for i in range(4):
             acc = 100.0 * n_class_correct[i] / n_class_samples[i]
-            print(f'Accuracy of {classes[i]}: {acc} %')
-        print(f'Best result: {max_acc} %')
+            print(f'Type:{i} : {acc}')
+            wa = wa + acc
+
+        if max_wa < wa:
+            max_wa = wa
+        print(f'WA: {max_wa / 4} %')
+
+        print(f'BEST - UA: {max_ua} %, WA:{max_wa/4}')
         print(f'------------------------')
+
+
+max_ua = 0
+max_wa = 0
+n_total_steps = len(train_loader)
+for epoch in range(num_epochs):
+    for i, (features, labels) in enumerate(train_loader):
+        train(features, labels)
+    test(max_ua, max_wa)
 
 print(model.name)
 print(f'batch:{batch_size},lr:{learning_rate}')

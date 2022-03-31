@@ -7,7 +7,6 @@ class ACCN_BASE(nn.Module):
 
     def __init__(self):
         super(ACCN_BASE, self).__init__()
-        self.name = "base"
         self.conv1_1 = nn.Conv2d(1, 16, (10, 2))
         self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
         self.nm1_1 = nn.BatchNorm2d(16)
@@ -22,7 +21,7 @@ class ACCN_BASE(nn.Module):
         self.pd2 = nn.ZeroPad2d([0, 2, 2, 0])
         self.nm2 = nn.BatchNorm2d(32)
         # rule
-        self.maxPool22 = nn.MaxPool2d((2, 2), ceil_mode=True)
+        self.maxPool22 = nn.AvgPool2d((2, 2), ceil_mode=True)
 
         self.conv3 = nn.Conv2d(32, 48, (3, 3))
         self.pd3 = nn.ZeroPad2d([0, 2, 2, 0])
@@ -51,7 +50,7 @@ class ACCN_BASE(nn.Module):
             self.attention_key.append(nn.Conv2d(80, 32, (1, 1)))
             self.attention_value.append(nn.Conv2d(80, 32, (1, 1)))
 
-        self.classifier = nn.Linear(64, 4)
+        self.classifier = nn.Linear(80, 4)
 
         self.mul = torch.mul
         self.softmax = torch.softmax
@@ -65,42 +64,35 @@ class ACCN_BASE(nn.Module):
         xx = self.pd1_1(xx)
         xx = self.nm1_1(xx)
         xx = F.relu(xx)
-        print(1, xx.shape)
 
         yy = self.conv1_2(x)
         yy = self.pd1_2(yy)
         yy = self.nm1_2(yy)
         yy = F.relu(yy)
-        print(2, yy.shape)
 
         x = torch.cat([xx, yy], dim=2)
-        print(3, x.shape)
 
         x = self.conv2(x)
         x = self.pd2(x)
         x = self.nm2(x)
         x = F.relu(x)
         x = self.maxPool22(x)
-        print(4, x.shape)
 
         x = self.conv3(x)
         x = self.pd3(x)
         x = self.nm3(x)
         x = F.relu(x)
         x = self.maxPool22(x)
-        print(5, x.shape)
 
         x = self.conv4(x)
         x = self.pd4(x)
         x = self.nm4(x)
         x = F.relu(x)
-        print(6, x.shape)
 
         x = self.conv5(x)
         x = self.pd5(x)
         x = self.nm5(x)
         x = F.relu(x)
-        print(7, x.shape)
 
         attn = None
         for i in range(self.attention_heads):
@@ -114,23 +106,13 @@ class ACCN_BASE(nn.Module):
             else:
                 attn = self.cat([attn, attention], 3)
 
-        print(8, x.shape)
-
-        x = attn.transpose(1, 2)
-        x = x.transpose(2, 3)
-        print(9, x.shape)
-
         x = F.relu(x)
-        print(10, x.shape)
 
         x = self.avg(x)
-        print(11, x.shape)
 
         x = x.view(b, -1)
-        print(12, x.shape)
 
         x = self.classifier(x)
-        print(13, x.shape)
 
         return x
 
