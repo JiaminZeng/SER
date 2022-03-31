@@ -37,6 +37,31 @@ def Seg_MFCC(x):
     return features
 
 
+def Seg_MFCC_S(x):
+    x, sp = sf.read(x)
+    features = []
+    length = len(x)
+    max_len = 65200
+    if length < max_len:
+        x = pad(x)
+    inx = 0
+    length = len(x)
+
+    while inx + max_len <= length:
+        ed = inx + max_len
+        t = x[inx:ed]
+        mfcc = librosa.feature.mfcc(t, sr=sp, n_mfcc=32)
+        mfcc = np.transpose(mfcc)
+        features.append(mfcc)
+        inx += 8000
+    if length - max_len > 0:
+        t = x[length - max_len:]
+        mfcc = librosa.feature.mfcc(t, sr=sp, n_mfcc=32)
+        mfcc = np.transpose(mfcc)
+        features.append(mfcc)
+    return features
+
+
 def MFCC(x):
     x, sp = sf.read(x)
     if len(x.shape) == 2:
@@ -54,8 +79,9 @@ def MFCC(x):
 
 if __name__ == "__main__":
     f = r"../Data/IEMOCAP/Wav/Ses03M_impro07/Ses03M_impro07_M007.wav"
-    ret = MFCC(f)
-    np.savetxt('./out', ret, fmt="%.5e", delimiter=',')
-    print(ret)
+    ret = Seg_MFCC_S(f)
+    # print(ret[0].shape)
+    # np.savetxt('./out', ret, fmt="%.5e", delimiter=',')
+    # print(ret)
     # print(ret.head(5))
     # print(Seg_MFCC(f)[1].shape)

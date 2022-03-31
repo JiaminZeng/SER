@@ -45,10 +45,10 @@ RAVDESS_path = './Data/RAVDESS'
 # A = torch.Tensor(A).to(device)
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train")
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", seg=True)
 # train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
 
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test")
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test", seg=True)
 # test_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="test")
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)

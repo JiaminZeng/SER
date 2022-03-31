@@ -9,7 +9,7 @@ import soundfile as sf
 import torch
 from torch.utils.data.dataset import Dataset
 
-from Utils.FeaturesUtils import Seg_MFCC, MFCC
+from Utils.FeaturesUtils import Seg_MFCC, MFCC, Seg_MFCC_S
 from Utils.GetFunction import LFCC
 
 
@@ -101,7 +101,7 @@ class IEMOCAPDataset(Dataset):
             self.features = []
             self.temp_labels = []
             for id in self.series:
-                ret = Seg_MFCC(self.paths[id])
+                ret = Seg_MFCC_S(self.paths[id])
                 for item in ret:
                     self.features.append(torch.Tensor(item))
                     self.temp_labels.append(self.labels[id])
