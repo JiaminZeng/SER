@@ -28,7 +28,7 @@ def walk_iemocap(label_folder_path, file_root, use=False):
     for root, dirs, files in os.walk(label_folder_path):
         for item in files:
             full_path = os.path.join(root, item)
-            if 'Ses' in full_path and 'impro' in full_path:  # impro 70.85,
+            if 'Ses' in full_path and 'impro' in full_path:
                 audio_folder_path = item.split('.')[0]
                 with open(full_path, 'r') as f:
                     for line in f:
@@ -108,13 +108,13 @@ class IEMOCAPDataset(Dataset):
         else:
             for id in self.series:
                 ret = MFCC(self.paths[id])
-                self.features.append(ret)
+                self.features.append(torch.Tensor(ret))
                 self.temp_labels.append(self.labels[id])
+
         self.labels = np.array(self.temp_labels).reshape(-1)
         self.n_samples = len(self.labels)
         self.series = [inx for inx in range(self.n_samples)]
         random.shuffle(self.series)
-        self.features = torch.Tensor(self.features)
         self.labels = torch.from_numpy(self.labels).type(torch.long)
 
     def __getitem__(self, index):

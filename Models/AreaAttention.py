@@ -118,17 +118,17 @@ class ACCN_Area(nn.Module):
     def __init__(self):
         super(ACCN_Area, self).__init__()
         self.name = "ACCN_Area"
-        self.conv1_1 = nn.Conv2d(1, 8, (10, 2))
+        self.conv1_1 = nn.Conv2d(1, 16, (10, 2))
         self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
-        self.nm1_1 = nn.BatchNorm2d(8)
-        self.conv1_2 = nn.Conv2d(1, 8, (2, 8))
+        self.nm1_1 = nn.BatchNorm2d(16)
+        self.conv1_2 = nn.Conv2d(1, 16, (2, 8))
         self.pd1_2 = nn.ZeroPad2d([0, 7, 1, 0])
-        self.nm1_2 = nn.BatchNorm2d(8)
+        self.nm1_2 = nn.BatchNorm2d(16)
 
         # concatenate
         # rule
 
-        self.conv2 = nn.Conv2d(16, 32, (3, 3))
+        self.conv2 = nn.Conv2d(32, 32, (3, 3))
         self.pd2 = nn.ZeroPad2d([0, 2, 2, 0])
         self.nm2 = nn.BatchNorm2d(32)
         # rule
