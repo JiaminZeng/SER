@@ -22,10 +22,10 @@ file_root = './Data/IEMOCAP/Wav'
 RAVDESS_path = './Data/RAVDESS'
 
 # Dataset
-train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train",seg=True)
+train_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="train", seg=True)
 # train_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="train")
 
-test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test",seg=True)
+test_dataset = IEMOCAPDataset(label_folder_path, file_root, feature_type=feature_type, usage="test", seg=True)
 # test_dataset = RAVDESSDataset(RAVDESS_path, feature_type=feature_type,usage="test")
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
@@ -82,15 +82,15 @@ def test():
                     n_class_correct[label] += 1
                 n_class_samples[label] += 1
 
-        ua = 100.0 * n_correct / n_samples
+        wa = 100.0 * n_correct / n_samples
 
-        wa = 0
+        ua = 0
         for i in range(4):
             acc = 100.0 * n_class_correct[i] / n_class_samples[i]
             print(f'Type:{classes[i]} : {acc}   {n_class_correct[i]}/{n_class_samples[i]}')
-            wa = wa + acc
+            ua = ua + acc
 
-        return ua, wa / 4
+        return ua / 4, wa
 
 
 if __name__ == "__main__":
@@ -100,7 +100,6 @@ if __name__ == "__main__":
     for epoch in range(num_epochs):
         for i, (features, labels) in enumerate(train_loader):
             train(features, labels)
-
 
         print(f'Epoch [{epoch + 1}/{num_epochs}]')
         ua, wa = test()
