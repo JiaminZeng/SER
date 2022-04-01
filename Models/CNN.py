@@ -11,15 +11,15 @@ class CNN_BASE(nn.Module):
         self.pool22 = nn.MaxPool2d((2, 2), ceil_mode=True)
         self.activation = F.relu
 
-        if activation == 'PReLu':
-            self.activation = F.prelu
+        if activation == 'RReLu':
+            self.activation = F.rrelu
         elif activation == 'Tanh':
             self.activation = F.tanh
 
         if pool == 'Avg':
             self.pool22 = nn.AvgPool2d((2, 2), ceil_mode=True)
-        elif pool == 'MaxUn':
-            self.pool22 = nn.MaxUnpool2d((2, 2))
+        elif pool == 'LP':
+            self.pool22 = nn.LPPool2d(2, 2, ceil_mode=True)
 
         self.conv1_1 = nn.Conv2d(1, 16, (10, 2))
         self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
@@ -101,7 +101,7 @@ class CNN_BASE(nn.Module):
 if __name__ == '__main__':
     import numpy as np
 
-    model = CNN_BASE()
+    model = CNN_BASE(pool='LP')
     np.random.seed(1)
     test = np.random.random((16, 1, 128, 32)).astype(np.float32)
     x = torch.from_numpy(test)

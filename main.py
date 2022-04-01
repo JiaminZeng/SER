@@ -5,6 +5,7 @@ import torch
 simplefilter(action='ignore', category=FutureWarning)
 
 from Models.ACNN import *
+from Models.CNN import *
 from Models.SelfAttnCompare import *
 from Models.AreaAttention import *
 from dataset import IEMOCAPDataset
@@ -14,7 +15,7 @@ batch_size = 16
 learning_rate = 0.05
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ACCN_Torch().to(device)
+model = CNN_BASE(pool='MaxUn').to(device)
 feature_type = "MFCC"
 
 label_folder_path = './Data/IEMOCAP/Evaluation'

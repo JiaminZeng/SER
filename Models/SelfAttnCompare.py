@@ -235,13 +235,11 @@ class ACCN(nn.Module):
 
 class ACCN_Torch_GAP(nn.Module):
     """
-        63.22
-        +aug 64.23
+
     """
 
     def __init__(self):
         super(ACCN_Torch_GAP, self).__init__()
-        self.name = "0_0"
         self.conv1_1 = nn.Conv2d(1, 8, (10, 2))
         self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
         self.nm1_1 = nn.BatchNorm2d(8)
