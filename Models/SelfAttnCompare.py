@@ -354,10 +354,10 @@ class ACCN_Torch_GAP(nn.Module):
 
 
 if __name__ == "__main__":
-    model = ACCN_Torch_GAP()
+    model = ACCN_Torch()
     x = torch.randn(16, 1, 128, 32)
     model(x)
-    # print(model(x))
+    print(model(x))
 
 """
     torch.Size([16, 80, 16, 4])

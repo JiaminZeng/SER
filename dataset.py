@@ -21,14 +21,14 @@ def generator(path):
         sf.write(path + '_' + str(i) + '.wav', wavAug, 16000)
 
 
-def walk_iemocap(label_folder_path, file_root, use=False):
+def walk_iemocap(label_folder_path, file_root, use=False, audio_type='Ses'):
     emotions_used = {'ang': 0, 'exc': 1, 'neu': 2, 'sad': 3, }
     paths = []
     labels = []
     for root, dirs, files in os.walk(label_folder_path):
         for item in files:
             full_path = os.path.join(root, item)
-            if 'Ses' in full_path and 'impro' in full_path:
+            if 'Ses' in full_path and audio_type in full_path:
                 audio_folder_path = item.split('.')[0]
                 with open(full_path, 'r') as f:
                     for line in f:
@@ -71,14 +71,18 @@ def walk_ravdess(path):
 
 class IEMOCAPDataset(Dataset):
 
-    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all", aug=False, seg=False):
-        self.paths, self.labels = walk_iemocap(label_folder_path, file_root, use=aug)
+    def __init__(self, label_folder_path, file_root, feature_type="MFCC", usage="all", aug=False, seg=False,
+                 audio_type='Ses'):
+        self.paths, self.labels = walk_iemocap(label_folder_path, file_root, use=aug, audio_type=audio_type)
         self.n_samples = self.labels.shape[0]
         self.seg = seg
+        self.ids = []
+
         if aug:
             self.n_samples //= 8
+
         self.feature = feature_type
-        random.seed(321)  # 321
+        random.seed(121221)  # 321
         self.series = [inx for inx in range(self.n_samples)]
         random.shuffle(self.series)
         num = int(self.n_samples / 5)
@@ -88,6 +92,7 @@ class IEMOCAPDataset(Dataset):
             self.series = self.series[num:]
         else:
             self.series = self.series[:num]
+
         if aug:
             temp = []
             for item in self.series:
@@ -95,16 +100,17 @@ class IEMOCAPDataset(Dataset):
                     temp.append(item * 8 + inx)
             self.series = temp
             random.shuffle(self.series)
-
         self.n_samples = len(self.series)
         self.features = []
         self.temp_labels = []
+        self.tot = self.n_samples
         if seg:
             for id in self.series:
                 ret = Seg_MFCC_S(self.paths[id])
                 for item in ret:
                     self.features.append(torch.Tensor(item))
                     self.temp_labels.append(self.labels[id])
+                    self.ids.append(id)
         else:
             for id in self.series:
                 ret = MFCC(self.paths[id])
@@ -119,7 +125,7 @@ class IEMOCAPDataset(Dataset):
 
     def __getitem__(self, index):
         id = self.series[index]
-        return self.features[id], self.labels[id]
+        return self.features[id], self.labels[id], self.ids[id]
 
     def __len__(self):
         return self.n_samples
