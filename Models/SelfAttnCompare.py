@@ -2,24 +2,16 @@ import torch.functional
 import torch.nn as nn
 import torch.nn.functional as F
 
-"""
-    Test MultiHead between Self-Build and Torch-Build
-"""
-
 
 class ACCN_Torch(nn.Module):
-    """
-        63.22
-        +aug 64.23
-    """
 
     def __init__(self):
         super(ACCN_Torch, self).__init__()
-        self.conv1_1 = nn.Conv2d(1, 8, (10, 2))
-        self.pd1_1 = nn.ZeroPad2d([0, 1, 9, 0])
+        self.conv1_1 = nn.Conv2d(1, 8, (12, 2))
+        self.pd1_1 = nn.ZeroPad2d([0, 1, 11, 0])
         self.nm1_1 = nn.BatchNorm2d(8)
-        self.conv1_2 = nn.Conv2d(1, 8, (2, 8))
-        self.pd1_2 = nn.ZeroPad2d([0, 7, 1, 0])
+        self.conv1_2 = nn.Conv2d(1, 8, (2, 6))
+        self.pd1_2 = nn.ZeroPad2d([0, 5, 1, 0])
         self.nm1_2 = nn.BatchNorm2d(8)
 
         # concatenate
@@ -97,7 +89,6 @@ class ACCN_Torch(nn.Module):
         x = self.nm5(x)
         x = F.relu(x)
 
-        # print(x.shape)
         x = x.view(-1, 16, 4)
         x = x.transpose(0, 1)
         Q = x
@@ -106,12 +97,10 @@ class ACCN_Torch(nn.Module):
         attn, _ = self.attn(Q, K, V)
         x = attn.transpose(0, 1)
         x = x.view(b, -1, 16, 4)
-        # print(x.shape)
         x = F.relu(x)
         x = x.reshape(b, -1)
         x = self.classifier(x)
         return x
-
 
 
 class ACCN(nn.Module):

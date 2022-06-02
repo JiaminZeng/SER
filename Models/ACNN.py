@@ -9,7 +9,7 @@ class ACNN_PART1_2(nn.Module):
     def __init__(self, activation='RReLu', pool='LP', attn='Base'):
         super(ACNN_PART1_2, self).__init__()
 
-        self.pool22 = nn.MaxPool2d((2, 2), ceil_mode=True)
+        self.pool22 = nn.MaxPool2d((3, 3), ceil_mode=True)
         self.activation = F.relu
         self.attn_type = attn
 

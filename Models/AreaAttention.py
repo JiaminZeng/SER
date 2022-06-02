@@ -5,9 +5,6 @@ import torch.nn.functional as F
 
 
 class ACCN_Area_Multi(nn.Module):
-    """
-
-    """
 
     def __init__(self):
         super(ACCN_Area_Multi, self).__init__()
@@ -110,10 +107,7 @@ class ACCN_Area_Multi(nn.Module):
 
 
 class ACCN_Area(nn.Module):
-    """
-        normal:62.10
-        +aug:64.33
-    """
+
 
     def __init__(self):
         super(ACCN_Area, self).__init__()
